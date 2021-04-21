@@ -189,8 +189,7 @@ class OrderService
             ]);
             return new JsonResponse(['id' => $session->id]);
         } catch (ApiErrorException $e) {
-            return new JsonResponse($e->getMessage());
-            //throw new StripeApiException($e->getMessage());
+            throw new StripeApiException($e->getMessage());
         }
     }
 

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Controller\Shop;
+namespace App\Controller\Shop\Product;
 
 use App\Controller\RouteName;
 use App\Entity\Shop\Locale;
@@ -18,7 +18,7 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Annotation\Route;
 
 #[Route('/{_locale}/shop')]
-class ShopController extends AbstractController
+class ProductController extends AbstractController
 {
     private LocaleRepository $localeRepository;
 

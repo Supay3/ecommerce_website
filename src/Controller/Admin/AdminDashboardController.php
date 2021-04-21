@@ -44,10 +44,10 @@ class AdminDashboardController extends AbstractDashboardController
             MenuItem::linkToCrud('Produits vendus', 'fas fa-dolly', ProductSold::class),
 
             MenuItem::section('Produit'),
-            MenuItem::linkToCrud('Produits', 'fas fa-box', Product::class),
-            MenuItem::linkToCrud('Marques de produits', 'far fa-copyright', ProductBrand::class),
-            MenuItem::linkToCrud('Types de produits', 'fas fa-tag', ProductType::class),
             MenuItem::linkToCrud('Catégories de produit', 'fas fa-boxes', ProductCategory::class),
+            MenuItem::linkToCrud('Types de produits', 'fas fa-tag', ProductType::class),
+            MenuItem::linkToCrud('Marques de produits', 'far fa-copyright', ProductBrand::class),
+            MenuItem::linkToCrud('Produits', 'fas fa-box', Product::class),
 
             MenuItem::section('Méthode de paiement'),
             MenuItem::linkToCrud('Méthodes de paiement', 'far fa-credit-card', PayementMethod::class),
