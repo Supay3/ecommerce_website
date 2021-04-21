@@ -1,0 +1,59 @@
+{% extends 'shop/shop_base.html.twig' %}
+
+{% block title %}{% endblock %}
+
+{% block body %}
+    <div class="container mt-4">
+        {% for errorLabel, errorMessages in app.flashes %}
+            {% for errorMessage in errorMessages %}
+                <div class="flash-{{ errorLabel }} alert alert-danger mb-4">
+                    {{ errorMessage }}
+                </div>
+            {% endfor %}
+        {% endfor %}
+        {% if products %}
+            <table class="table">
+                <thead>
+                <tr>
+                    <th>Produit</th>
+                    <th>Prix unitaire</th>
+                    <th>Quantité</th>
+                    <th>Prix du lot</th>
+                    <th></th>
+                </tr>
+                </thead>
+            <tbody>
+            {% for product in products %}
+                <tr>
+                    <td><a href="{{ path(constant('App\\Controller\\RouteName::SHOP_SHOW'), {id: product.item.id, slug: product.item.slug}) }}">{{ product.translation.name }}</a></td>
+                    <td>{{ product.item.price|number_format(2) }} €</td>
+                    <td>{{ product.quantity }}</td>
+                    <td>{{ (product.item.price * product.quantity)|number_format(2) }} €</td>
+                    <td>
+                        <form action="{{ path(constant('App\\Controller\\RouteName::CART_REMOVE'), {id: product.item.id}) }}" method="POST">
+                            <input type="hidden" name="_token" value="{{ csrf_token('cart-remove' ~ product.item.id) }}">
+                            <button type="submit" class="btn btn-danger">Retirer</button>
+                        </form>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="3"></td>
+                    <td colspan="2">Total : {{ total|number_format(2) }} €</td>
+                </tr>
+            </tfoot>
+            </table>
+            <p>
+                <a href="{{ path(constant('App\\Controller\\RouteName::CHECKOUT_ADDRESS')) }}" class="btn btn-success">Valider le panier</a>
+            </p>
+            <form action="{{ path(constant('App\\Controller\\RouteName::CART_REMOVE_ALL')) }}" method="POST">
+                <input type="hidden" name="_token" value="{{ csrf_token('cart-remove-all') }}">
+                <button type="submit" class="btn btn-danger">Vider tout le panier</button>
+            </form>
+        {% else %}
+            <p>Votre panier est vide :(</p>
+        {% endif %}
+    </div>
+{% endblock %}

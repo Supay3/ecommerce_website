@@ -1,0 +1,7 @@
+<div class="form-widget">
+    <ul>
+    {% for item in field.value %}
+            <li>{{ item.locale.code }} : {{ item.name }}</li>
+    {% endfor %}
+    </ul>
+</div>

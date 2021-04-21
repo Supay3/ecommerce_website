@@ -1,0 +1,23 @@
+{% extends 'shop/shop_base.html.twig' %}
+
+{% block title %}Hello CheckoutController!{% endblock %}
+
+{% block body %}
+    <div class="container mt-4">
+        {{ form_start(form) }}
+            {{ form_row(form.email) }}
+            {{ form_row(form.shippingAddress) }}
+            {% if form.vars.value.billingAddress %}
+                {{ form_row(form.billingAddress) }}
+                <button type="button" class="btn btn-danger mb-4 remove-billing-address" data-token="{{ csrf_token('remove-billing-address') }}">Retirer l'adresse de facturation</button>
+                <button type="button" class="btn btn-success mb-4 add-billing-address" hidden>Ajouter une adresse de facturation +</button>
+            {% else %}
+                {{ form_row(form.billingAddress, {'attr': {'hidden': ''}, 'label_attr': {'hidden': ''}}) }}
+                <button type="button" class="btn btn-danger mb-4 remove-billing-address" hidden data-token="{{ csrf_token('remove-billing-address') }}">Retirer l'adresse de facturation</button>
+                <button type="button" class="btn btn-success mb-4 add-billing-address">Ajouter une adresse de facturation +</button>
+            {% endif %}
+            {{ form_rest(form) }}
+            <button type="submit" class="btn btn-primary">Valider</button>
+        {{ form_end(form) }}
+    </div>
+{% endblock %}

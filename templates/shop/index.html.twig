@@ -1,0 +1,66 @@
+{% extends 'shop/shop_base.html.twig' %}
+
+{% block title %}Magasin Dubout{% endblock %}
+
+{% block body %}
+    <div class="jumbotron">
+        <div class="container">
+            {{ form_start(form) }}
+            {{ form_row(form) }}
+            {{ form_rest(form) }}
+            <button type="submit" class="btn btn-primary">Rechercher</button>
+            {{ form_end(form) }}
+        </div>
+    </div>
+    <div class="container mt-4 mb-4">
+        {% for categoryTranslation in categoriesTranslation %}
+            <h1 class="mt-4">{{ categoryTranslation.name }}</h1>
+            {% for productTypeTranslation in productTypesTranslation %}
+                {% if productTypeTranslation.productType.productCategory is same as categoryTranslation.productCategory %}
+                    <h2>{{ productTypeTranslation.name }}</h2>
+                    <div class="row row-cols-4">
+                        {% for productTranslation in productsTranslation %}
+                            {% if productTranslation.product.productType is same as productTypeTranslation.productType %}
+                                    <div class="col-md-4">
+                                        <div class="card mt-4" style="width: 18rem;">
+                                            {% for image in productTranslation.product.images %}
+                                                <img src="/images/shop/product/{{ image.imageName }}" class="card-img-top" alt="...">
+                                            {% endfor %}
+                                            <div class="card-body">
+                                                <h5 class="card-title">
+                                                    <a href="{{ path(constant('App\\Controller\\RouteName::SHOP_SHOW'), {id: productTranslation.product.id, slug: productTranslation.product.slug}) }}">
+                                                        {{ productTranslation.name }}
+                                                    </a>
+                                                </h5>
+                                                <p class="card-text">{{ productTranslation.description }}</p>
+                                                <p class="card-text">{{ productTranslation.product.price|number_format(2) }} €</p>
+                                                <div class="success-add-cart-container">
+                                                    <div class="alert alert-success success-add-cart" hidden>
+
+                                                    </div>
+                                                    <div class="alert alert-danger error-add-cart" hidden>
+
+                                                    </div>
+                                                    <button data-fetch="{{ absolute_url(path(constant('App\\Controller\\RouteName::CART_ADD_INDEX'), {id: productTranslation.product.id})) }}"
+                                                            data-token="{{ csrf_token('add-cart' ~ productTranslation.product.id) }}"
+                                                            class="btn btn-primary add-cart
+                                                            {% if productTranslation.product.stock <= 0 %}
+                                                                disabled
+                                                            {% endif %}">
+                                                        Ajouter au panier
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endfor %}
+        {% endfor %}
+        {% if categoriesTranslation is empty and productTypesTranslation is empty and productsTranslation is empty %}
+            <h4 class="text-center">Pas de résultat</h4>
+        {% endif %}
+    </div>
+{% endblock %}

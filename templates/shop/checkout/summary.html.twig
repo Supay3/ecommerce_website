@@ -1,0 +1,74 @@
+{% extends 'shop/shop_base.html.twig' %}
+
+{% block title %}Récapitulatif de votre commande{% endblock %}
+
+{% block body %}
+    <div class="container mt-4">
+        {% for errorLabel, errorMessages in app.flashes %}
+            {% for errorMessage in errorMessages %}
+                <div class="flash-{{ errorLabel }} alert alert-danger mb-4">
+                    {{ errorMessage }}
+                </div>
+            {% endfor %}
+        {% endfor %}
+        <div class="card mt-4 mb-4">
+            <div class="card-body">
+                <h5 class="card-title">Adresse de livraison{% if order.billingAddress is empty %} et de facturation{% endif %} :</h5>
+                <p class="card-text">{{ order.shippingAddress.firstname }} {{ order.shippingAddress.lastname }}</p>
+                <p class="card-text">{{ order.shippingAddress.street }}, <br> {{ order.shippingAddress.postcode|number_format(0, '', ' ') }}, <br> {{ order.shippingAddress.city }}</p>
+            </div>
+            {% if order.billingAddress %}
+                <div class="card-body">
+                    <h5 class="card-title">Adresse de facturation :</h5>
+                    <p class="card-text">{{ order.billingAddress.firstname }} {{ order.billingAddress.lastname }}</p>
+                    <p class="card-text">{{ order.billingAddress.street }}, <br> {{ order.billingAddress.postcode|number_format(0, '', ' ') }}, <br> {{ order.billingAddress.city }}</p>
+                </div>
+            {% endif %}
+        </div>
+        <table class="table">
+            <thead>
+            <tr>
+                <th>Produit</th>
+                <th>Prix unitaire</th>
+                <th>Quantité</th>
+                <th class="text-right">Prix du lot</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for product in cartProducts %}
+                <tr>
+                    <td>{{ product.translation.name }}</td>
+                    <td>{{ product.item.price|number_format(2) }} €</td>
+                    <td>{{ product.quantity }}</td>
+                    <td class="text-right">{{ (product.item.price * product.quantity)|number_format(2) }} €</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="3"></td>
+                    <td colspan="2" class="text-right">Total T.T.C : {{ total|number_format(2) }} €</td>
+                </tr>
+                <tr>
+                    <td colspan="3"></td>
+                    <td colspan="2" class="text-right">Total frais de ports : {{ totalShipment|number_format(2) }} €</td>
+                </tr>
+                <tr>
+                    <td colspan="3"></td>
+                    <td colspan="2" class="text-right"> Prix H.T : {{ (totalWithShipment*100/120)|number_format(2) }} €</td>
+                </tr>
+                <tr>
+                    <td colspan="3"></td>
+                    <td colspan="2" class="text-right"> T.V.A (20%) : {{ (totalWithShipment-(totalWithShipment*100/120))|number_format(2) }} €</td>
+                </tr>
+                <tr>
+                    <td colspan="3"></td>
+                    <td colspan="2" class="text-right">Total avec frais de ports T.T.C : {{ totalWithShipment|number_format(2) }} €</td>
+                </tr>
+            </tfoot>
+        </table>
+        <a href="{{ path(constant('App\\Controller\\RouteName::CHECKOUT_VALIDATION')) }}" class="btn btn-success float-right">Valider et procéder au paiement</a>
+
+    </div>
+{% endblock %}
+

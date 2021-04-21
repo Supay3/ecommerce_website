@@ -1,0 +1,19 @@
+{% extends 'shop/shop_base.html.twig' %}
+
+{% block title %}{% endblock %}
+
+{% block body %}
+    <div class="container mt-4">
+        {% for errorLabel, errorMessages in app.flashes %}
+            {% for errorMessage in errorMessages %}
+                <div class="flash-{{ errorLabel }} alert alert-danger mb-4">
+                    {{ errorMessage }}
+                </div>
+            {% endfor %}
+        {% endfor %}
+        {{ form_start(form) }}
+            {{ form_rest(form) }}
+            <button class="btn btn-primary">Valider</button>
+        {{ form_end(form) }}
+    </div>
+{% endblock %}

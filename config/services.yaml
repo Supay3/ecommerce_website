@@ -4,6 +4,10 @@
 # Put parameters here that don't need to change on each machine where the app is deployed
 # https://symfony.com/doc/current/best_practices/configuration.html#application-related-configuration
 parameters:
+    app.path.product_image: /images/shop/product
+    app.path.product_category_image: /images/shop/product_category
+    app.path.product_brand_image: /images/shop/product_brand
+    app.path.product_type_image: /images/shop/product_type
 
 services:
     # default configuration for services in *this* file
@@ -29,3 +33,6 @@ services:
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
+    App\Services\Shop\Order\OrderService:
+        arguments:
+            $stripeKey: '%env(STRIPE_KEY)%'

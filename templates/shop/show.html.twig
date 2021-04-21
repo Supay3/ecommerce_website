@@ -1,0 +1,37 @@
+{% extends 'shop/shop_base.html.twig' %}
+
+{% block title %}Magasin Dubout - {{ productTranslation.name }}{% endblock %}
+
+{% block body %}
+    <div class="jumbotron">
+        <div class="container mt-8">
+            {% for errorLabel, errorMessages in app.flashes %}
+                {% for errorMessage in errorMessages %}
+                    <div class="alert alert-danger {{ errorLabel }}">
+                        {{ errorMessage }}
+                    </div>
+                {% endfor %}
+            {% endfor %}
+            <div class="row">
+                <div class="col-md-4">
+                    {% for image in product.images %}
+                        <img src="/images/shop/product/{{ image.imageName }}" class="card-img-top" alt="...">
+                    {% endfor %}
+                </div>
+                <div class="col-md-4">
+                    <h1>{{ productTranslation.name }}</h1>
+                    <p>{{ productTranslation.description|nl2br }}</p>
+                </div>
+                <div class="col-md-4 text-right">
+                    <h5>{{ product.price|number_format(2) }} €</h5>
+                    {% if product.stock > 0 %}
+                        <p class="text-success">En stock</p>
+                        {% include('shop/cart/_add_multiple_cart_form.html.twig') %}
+                    {% else %}
+                        <p class="text-danger">Plus de stock</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

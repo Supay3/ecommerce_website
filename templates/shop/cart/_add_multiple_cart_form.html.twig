@@ -1,0 +1,10 @@
+<form class="form-group" action="{{ path(constant('App\\Controller\\RouteName::CART_ADD'), {id: product.id}) }}" method="POST">
+    <label for="quantity">Quantité :</label>
+    <select class="form-control mb-4" name="quantity" id="quantity">
+        {% for i in 1..product.stock %}
+            <option value="{{ i }}">{{ i }}</option>
+        {% endfor %}
+    </select>
+    <input type="hidden" name="_token" value="{{ csrf_token('add' ~ product.id) }}">
+    <button type="submit" class="btn btn-primary">Ajouter au panier</button>
+</form>

@@ -1,0 +1,104 @@
+{% extends 'shop/shop_base.html.twig' %}
+
+{% block title %}Votre commande {{ order.number }}{% endblock %}
+
+{% block body %}
+    <div class="container">
+        {% if order.state < 2 %}
+            {% include('shop/order/_cancel_order.html.twig') %}
+        {% endif %}
+        {% for label, messages in app.flashes([constant('App\\Controller\\RouteName::BASIC_SUCCESS'), constant('App\\Controller\\RouteName::BASIC_ERROR')]) %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ label }} mt-4 mb-4">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+        {% endfor %}
+        <table class="table">
+            <thead>
+                <tr>
+                    <th colspan="4">Commande n°{{ order.number }}</th>
+                </tr>
+                <tr>
+                    <th>Produit</th>
+                    <th>Prix unitaire</th>
+                    <th>Quantité</th>
+                    <th class="text-right">Prix du lot</th>
+                </tr>
+            </thead>
+            <tbody>
+                    {% for productSold in order.productsSold %}
+                        <tr>
+                        {% for productTranslation in productSold.product.productTranslations %}
+                            {% if productTranslation.locale.code is same as app.request.locale %}
+                                <td><a href="{{ path(constant('App\\Controller\\RouteName::SHOP_SHOW'), {id: productSold.product.id, slug: productSold.product.slug}) }}">{{ productTranslation.name }}</a></td>
+                                <td>{{ productSold.product.price|number_format(2) }} €</td>
+                                <td>{{ productSold.quantity }}</td>
+                                <td class="text-right">{{ (productSold.quantity * productSold.product.price)|number_format(2) }} €</td>
+                            {% endif %}
+                        {% endfor %}
+                        </tr>
+                    {% endfor %}
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="3"></td>
+                    <td class="text-right">Total TTC : {{ order.total|number_format(2) }} €</td>
+                </tr>
+                <tr>
+                    <td colspan="3"></td>
+                    <td class="text-right">Total FDP : {{ order.shipment.price|number_format(2) }} €</td>
+                </tr>
+                <tr>
+                    <td colspan="3"></td>
+                    <td class="text-right">Total FDP compris : {{ order.totalWithShipment|number_format(2) }} €</td>
+                </tr>
+                <tr>
+                    <td colspan="3"></td>
+                    <td class="text-right text-primary">
+                        Statut de la commande : {{ orderState[order.state] }}
+                        {% if order.state is same as 0 %}
+                            <br><button id="checkout-button" class="btn btn-primary mt-4" data-token="{{ csrf_token('pay-order' ~ order.id) }}">Payer</button>
+                        {% endif %}
+                    </td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+    <script type="text/javascript" defer>
+        if (document.getElementById('checkout-button')) {
+            // Create an instance of the Stripe object with your publishable API key
+            var stripe = Stripe(
+                '{{ app.request.server.get('STRIPE_CLIENT') }}'
+            );
+            var checkoutButton = document.getElementById('checkout-button');
+
+            checkoutButton.addEventListener('click', function() {
+                let token = checkoutButton.getAttribute('data-token');
+                // Create a new Checkout Session using the server-side endpoint you
+                // created in step 3.
+                fetch('{{ path(constant('App\\Controller\\RouteName::CHECKOUT_PAY'), {id: order.id}) ~ constant('App\\Controller\\RouteName::ORDER_TOKEN') ~ order.token }}', {
+                    method: 'POST',
+                    body: token
+                })
+                    .then(function(response) {
+                        return response.json();
+                    })
+                    .then(function(session) {
+                        return stripe.redirectToCheckout({ sessionId: session.id });
+                    })
+                    .then(function(result) {
+                        // If `redirectToCheckout` fails due to a browser or network
+                        // error, you should display the localized error message to your
+                        // customer using `error.message`.
+                        if (result.error) {
+                            alert(result.error.message);
+                        }
+                    })
+                    .catch(function(error) {
+                        console.error('Error:', error);
+                    });
+            });
+        }
+    </script>
+{% endblock %}
