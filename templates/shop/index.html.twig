@@ -1,14 +1,26 @@
 {% extends 'shop/shop_base.html.twig' %}
 
-{% block title %}Magasin Dubout{% endblock %}
+{% block title %}Shop{% endblock %}
 
 {% block body %}
     <div class="jumbotron">
         <div class="container">
             {{ form_start(form) }}
-            {{ form_row(form) }}
-            {{ form_rest(form) }}
-            <button type="submit" class="btn btn-primary">Rechercher</button>
+                <div class="row">
+                    <div class="col">
+                        {{ form_row(form.maxPrice) }}
+                    </div>
+                    <div class="col">
+                        {{ form_row(form.productCategories) }}
+                    </div>
+                    <div class="col">
+                        {{ form_row(form.productTypes) }}
+                    </div>
+                    {{ form_rest(form) }}
+                    <div class="col">
+                        <button type="submit" class="btn btn-primary">Rechercher</button>
+                    </div>
+                </div>
             {{ form_end(form) }}
         </div>
     </div>

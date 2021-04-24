@@ -11,6 +11,19 @@ import './styles/app.css';
 // start the Stimulus application
 import './bootstrap';
 
+import $ from 'jquery';
+import 'select2';
+$(document).ready(function () {
+    $('#product_search_productCategories').select2({
+        placeholder: $('#product_search_productCategories').attr('placeholder'),
+        allowClear: true,
+    });
+    $('#product_search_productTypes').select2({
+        placeholder: $('#product_search_productTypes').attr('placeholder'),
+        allowClear: true,
+    });
+});
+
 /**
  * The success block displayed when an item is added to cart successfully
  *
@@ -141,7 +154,7 @@ if (document.querySelector('.remove-billing-address')) {
 
 // For the profile :
 
-if (document.querySelectorAll('.nav-btn')) {
+if (document.querySelectorAll('.nav-btn') && document.querySelector('#addresses')) {
     let addressesButton = document.querySelector('#addresses-btn');
     let infosButton = document.querySelector('#infos-btn');
     let preferencesButton = document.querySelector('#preferences-btn');
