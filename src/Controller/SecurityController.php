@@ -8,6 +8,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 
+#[Route('/{_locale}/shop')]
 class SecurityController extends AbstractController
 {
     #[Route('/login', name: RouteName::APP_LOGIN)]

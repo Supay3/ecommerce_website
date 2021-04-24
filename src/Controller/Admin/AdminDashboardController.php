@@ -12,6 +12,7 @@ use App\Entity\Shop\Product\ProductBrand;
 use App\Entity\Shop\Product\ProductCategory;
 use App\Entity\Shop\Product\ProductType;
 use App\Entity\Shop\Shipment\Shipment;
+use App\Entity\User;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Dashboard;
 use EasyCorp\Bundle\EasyAdminBundle\Config\MenuItem;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractDashboardController;
@@ -53,5 +54,8 @@ class AdminDashboardController extends AbstractDashboardController
 
         yield MenuItem::section('Livraison');
         yield MenuItem::linkToCrud('Livraisons', 'fas fa-shipping-fast', Shipment::class);
+
+        yield MenuItem::section('Utilisateur');
+        yield MenuItem::linkToCrud('Utilisateurs', 'fas fa-user', User::class);
     }
 }

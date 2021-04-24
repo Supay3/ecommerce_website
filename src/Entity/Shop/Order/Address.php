@@ -87,6 +87,11 @@ class Address
      */
     private ?User $user = null;
 
+    public function __toString(): string
+    {
+        return $this->firstname;
+    }
+
     public function getId(): ?int
     {
         return $this->id;
