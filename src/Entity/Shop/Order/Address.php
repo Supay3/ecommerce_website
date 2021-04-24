@@ -2,6 +2,7 @@
 
 namespace App\Entity\Shop\Order;
 
+use App\Entity\User;
 use App\Repository\Shop\Order\AddressRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -80,6 +81,11 @@ class Address
      */
     #[Assert\NotBlank]
     private ?string $countryCode = null;
+
+    /**
+     * @ORM\ManyToOne(targetEntity=User::class, inversedBy="addresses")
+     */
+    private ?User $user = null;
 
     public function getId(): ?int
     {
@@ -178,6 +184,18 @@ class Address
     public function setCountryCode(string $countryCode): self
     {
         $this->countryCode = $countryCode;
+
+        return $this;
+    }
+
+    public function getUser(): ?User
+    {
+        return $this->user;
+    }
+
+    public function setUser(?User $user): self
+    {
+        $this->user = $user;
 
         return $this;
     }

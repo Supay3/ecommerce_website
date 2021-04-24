@@ -9,6 +9,10 @@ class RouteName
     // Routes for administration
     public const ADMIN_INDEX = 'admin_index';
 
+    // Routes for Users
+    public const APP_LOGIN = 'app_login';
+    public const APP_LOGOUT = 'app_logout';
+
     // Routes for the Shop
     public const SHOP_INDEX = 'shop_index';
     public const SHOP_SHOW = 'shop_show';

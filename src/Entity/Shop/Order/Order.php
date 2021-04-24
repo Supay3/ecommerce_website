@@ -3,6 +3,7 @@
 namespace App\Entity\Shop\Order;
 
 use App\Entity\Shop\Shipment\Shipment;
+use App\Entity\User;
 use App\Repository\Shop\Order\OrderRepository;
 use DateTime;
 use DateTimeInterface;
@@ -121,6 +122,11 @@ class Order
      * @ORM\Column(type="float")
      */
     private ?float $totalWithShipment = null;
+
+    /**
+     * @ORM\ManyToOne(targetEntity=User::class, inversedBy="orders")
+     */
+    private ?User $user = null;
 
     public function __construct()
     {
@@ -344,6 +350,18 @@ class Order
     public function setTotalWithShipment(?float $totalWithShipment): self
     {
         $this->totalWithShipment = $totalWithShipment;
+
+        return $this;
+    }
+
+    public function getUser(): ?User
+    {
+        return $this->user;
+    }
+
+    public function setUser(?User $user): self
+    {
+        $this->user = $user;
 
         return $this;
     }

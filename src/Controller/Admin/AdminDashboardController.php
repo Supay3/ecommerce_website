@@ -35,25 +35,23 @@ class AdminDashboardController extends AbstractDashboardController
     public function configureMenuItems(): iterable
     {
         yield MenuItem::linktoDashboard('Dashboard', 'fa fa-home');
-        yield MenuItem::subMenu('Magasin')->setSubItems([
-            MenuItem::section('Locale'),
-            MenuItem::linkToCrud('Locales', 'fas fa-language', Locale::class),
+        yield MenuItem::section('Locale');
+        yield MenuItem::linkToCrud('Locales', 'fas fa-language', Locale::class);
 
-            MenuItem::section('Commandes'),
-            MenuItem::linkToCrud('Commandes', 'fas fa-shopping-cart', Order::class),
-            MenuItem::linkToCrud('Produits vendus', 'fas fa-dolly', ProductSold::class),
+        yield MenuItem::section('Commandes');
+        yield MenuItem::linkToCrud('Commandes', 'fas fa-shopping-cart', Order::class);
+        yield MenuItem::linkToCrud('Produits vendus', 'fas fa-dolly', ProductSold::class);
 
-            MenuItem::section('Produit'),
-            MenuItem::linkToCrud('Catégories de produit', 'fas fa-boxes', ProductCategory::class),
-            MenuItem::linkToCrud('Types de produits', 'fas fa-tag', ProductType::class),
-            MenuItem::linkToCrud('Marques de produits', 'far fa-copyright', ProductBrand::class),
-            MenuItem::linkToCrud('Produits', 'fas fa-box', Product::class),
+        yield MenuItem::section('Produit');
+        yield MenuItem::linkToCrud('Catégories de produit', 'fas fa-boxes', ProductCategory::class);
+        yield MenuItem::linkToCrud('Types de produits', 'fas fa-tag', ProductType::class);
+        yield MenuItem::linkToCrud('Marques de produits', 'far fa-copyright', ProductBrand::class);
+        yield MenuItem::linkToCrud('Produits', 'fas fa-box', Product::class);
 
-            MenuItem::section('Méthode de paiement'),
-            MenuItem::linkToCrud('Méthodes de paiement', 'far fa-credit-card', PayementMethod::class),
+        yield MenuItem::section('Méthode de paiement');
+        yield MenuItem::linkToCrud('Méthodes de paiement', 'far fa-credit-card', PayementMethod::class);
 
-            MenuItem::section('Livraison'),
-            MenuItem::linkToCrud('Livraisons', 'fas fa-shipping-fast', Shipment::class),
-        ]);
+        yield MenuItem::section('Livraison');
+        yield MenuItem::linkToCrud('Livraisons', 'fas fa-shipping-fast', Shipment::class);
     }
 }
