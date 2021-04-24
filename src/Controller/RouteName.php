@@ -12,6 +12,10 @@ class RouteName
     // Routes for Users
     public const APP_LOGIN = 'app_login';
     public const APP_LOGOUT = 'app_logout';
+    public const USER_PROFILE_INDEX = 'user_profile_index';
+    public const USER_PROFILE_ADD_ADDRESS = 'user_profile_add_address';
+    public const USER_PROFILE_EDIT_ADDRESS = 'user_profile_edit_address';
+    public const USER_PROFILE_DELETE_ADDRESS = 'user_profile_delete_address';
 
     // Routes for the Shop
     public const SHOP_INDEX = 'shop_index';

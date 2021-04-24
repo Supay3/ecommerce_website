@@ -34,17 +34,31 @@
                     <li class="nav-item">
                         <a class="nav-link" href="{{ path(constant('App\\Controller\\RouteName::CART_INDEX')) }}">Panier</a>
                     </li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            Dropdown
-                        </a>
-                        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                            <a class="dropdown-item" href="#">Action</a>
-                            <a class="dropdown-item" href="#">Another action</a>
-                            <div class="dropdown-divider"></div>
-                            <a class="dropdown-item" href="#">Something else here</a>
-                        </div>
-                    </li>
+                    {% if is_granted('ROLE_USER') %}
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                Profil
+                            </a>
+                            <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                                <a class="dropdown-item" href="{{ path(constant('App\\Controller\\RouteName::USER_PROFILE_INDEX')) }}">Voir votre profil</a>
+                                <a class="dropdown-item" href="#">Another action</a>
+                                <div class="dropdown-divider"></div>
+                                <a class="dropdown-item" href="#">Something else here</a>
+                            </div>
+                        </li>
+                    {% endif %}
+                    {% if is_granted('IS_ANONYMOUS') %}
+                        <li class="nav-item">
+                            <a href="{{ path(constant('App\\Controller\\RouteName::APP_LOGIN')) }}" class="nav-link">Se connecter</a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="#" class="nav-link">Créer un compte</a>
+                        </li>
+                    {% elseif is_granted('IS_AUTHENTICATED_FULLY') %}
+                        <li class="nav-item">
+                            <a href="{{ path(constant('App\\Controller\\RouteName::APP_LOGOUT')) }}" class="nav-link text-danger">Se déconnecter</a>
+                        </li>
+                    {% endif %}
                 </ul>
             </div>
         </nav>

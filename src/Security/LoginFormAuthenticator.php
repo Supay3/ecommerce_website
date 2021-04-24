@@ -3,7 +3,7 @@
 namespace App\Security;
 
 use App\Controller\RouteName;
-use App\Entity\User;
+use App\Entity\User\User;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;

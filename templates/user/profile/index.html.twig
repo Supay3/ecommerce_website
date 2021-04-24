@@ -1,0 +1,79 @@
+{% extends 'shop/shop_base.html.twig' %}
+
+{% block body %}
+    <div class="container mt-4">
+        <h1>Votre profil</h1>
+        <div class="card">
+            <div class="card-header">
+                <ul class="nav nav-tabs card-header-tabs">
+                    <li class="nav-item">
+                        <a href="#addresses" class="nav-link nav-btn active" id="addresses-btn">Vos adresses</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#infos" class="nav-link nav-btn" id="infos-btn">Vos informations personnelles</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#preferences" class="nav-link nav-btn" id="preferences-btn">Préférences</a>
+                    </li>
+                </ul>
+            </div>
+            <div class="card-body text-center" id="addresses">
+                {% for address in app.user.addresses %}
+                    {% if address.main == true %}
+                        <div class="card mb-4">
+                            <div class="card-body">
+                                <h5 class="card-title">Adresse principale :</h5>
+                                <p class="card-text">
+                                    {{ address.firstname }} {{ address.lastname }}<br>
+                                    {{ address.street }}<br>
+                                    {% if address.company %}
+                                        {{ address.company }}<br>
+                                    {% endif %}
+                                    {{ address.postcode|number_format(0, '', ' ') }},<br>
+                                    {{ address.city }}<br>
+                                    {{ address.countryCode }}
+                                </p>
+                                <a href="{{ path(constant('App\\Controller\\RouteName::USER_PROFILE_EDIT_ADDRESS'), {id: address.id}) }}" class="btn btn-primary">Modifier</a>
+                                {% include 'user/profile/_delete_address_form.html.twig' %}
+                            </div>
+                        </div>
+                    {% endif %}
+                {% endfor %}
+                {% for address in app.user.addresses %}
+                    {% if app.user.addresses.count > 1 and address.main == false %}
+                        <div class="card mb-4">
+                            <div class="card-body">
+                                <h5 class="card-title">Adresse secondaire :</h5>
+                                <p class="card-text">
+                                    {{ address.firstname }} {{ address.lastname }}<br>
+                                    {{ address.street }}<br>
+                                    {% if address.company %}
+                                        {{ address.company }}<br>
+                                    {% endif %}
+                                    {{ address.postcode|number_format(0, '', ' ') }},<br>
+                                    {{ address.city }}<br>
+                                    {{ address.countryCode }}
+                                </p>
+                                <a href="{{ path(constant('App\\Controller\\RouteName::USER_PROFILE_EDIT_ADDRESS'), {id: address.id}) }}" class="btn btn-primary">Modifier</a>
+                                {% include 'user/profile/_delete_address_form.html.twig' %}
+                            </div>
+                        </div>
+                    {% endif %}
+                {% endfor %}
+                <a href="{{ path(constant('App\\Controller\\RouteName::USER_PROFILE_ADD_ADDRESS')) }}" class="btn btn-success">Ajouter une adresse +</a>
+            </div>
+            <div class="card-body" id="infos" hidden>
+                <h5 class="card-title">Vos informations personnelles :</h5>
+                <p class="card-text">Votre prénom : {{ app.user.firstname }}</p>
+                <p class="card-text">Votre nom : {{ app.user.lastname }}</p>
+                <p class="card-text">Votre adresse email : <span class="text-primary">{{ app.user.email }}</span></p>
+                {% if app.user.phoneNumber %}
+                    <p class="card-text">Votre numéro : {{ app.user.phoneNumber }}</p>
+                {% endif %}
+            </div>
+            <div class="card-body" id="preferences" hidden>
+                <h5 class="card-title">Vos préférences :</h5>
+            </div>
+        </div>
+    </div>
+{% endblock %}

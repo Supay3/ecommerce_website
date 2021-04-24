@@ -138,3 +138,67 @@ if (document.querySelector('.add-billing-address')) {
 if (document.querySelector('.remove-billing-address')) {
     removeBilling();
 }
+
+// For the profile :
+
+if (document.querySelectorAll('.nav-btn')) {
+    let addressesButton = document.querySelector('#addresses-btn');
+    let infosButton = document.querySelector('#infos-btn');
+    let preferencesButton = document.querySelector('#preferences-btn');
+
+    let addressesCard = document.querySelector('#addresses');
+    let infosCard = document.querySelector('#infos');
+    let preferencesCard = document.querySelector('#preferences');
+
+    addressesButton.addEventListener('click', () => {
+        addressesButton.classList.add('active');
+        addressesCard.removeAttribute('hidden');
+
+        infosButton.classList.remove('active');
+        infosCard.setAttribute('hidden', '');
+
+        preferencesButton.classList.remove('active');
+        preferencesCard.setAttribute('hidden', '');
+    });
+
+    infosButton.addEventListener('click', () => {
+        infosButton.classList.add('active');
+        infosCard.removeAttribute('hidden');
+
+        addressesButton.classList.remove('active');
+        addressesCard.setAttribute('hidden', '');
+
+        preferencesButton.classList.remove('active');
+        preferencesCard.setAttribute('hidden', '');
+    });
+
+    preferencesButton.addEventListener('click', () => {
+        preferencesButton.classList.add('active');
+        preferencesCard.removeAttribute('hidden');
+
+        addressesButton.classList.remove('active');
+        addressesCard.setAttribute('hidden', '');
+
+        infosButton.classList.remove('active');
+        infosCard.setAttribute('hidden', '');
+    });
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

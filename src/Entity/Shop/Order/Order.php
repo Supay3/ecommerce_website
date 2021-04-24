@@ -3,7 +3,7 @@
 namespace App\Entity\Shop\Order;
 
 use App\Entity\Shop\Shipment\Shipment;
-use App\Entity\User;
+use App\Entity\User\User;
 use App\Repository\Shop\Order\OrderRepository;
 use DateTime;
 use DateTimeInterface;

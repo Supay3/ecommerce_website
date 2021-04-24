@@ -1,0 +1,18 @@
+{% extends 'shop/shop_base.html.twig' %}
+
+{% block body %}
+    <div class="container mt-4">
+        <h1>Votre profil</h1>
+        <div class="card">
+            <div class="card-header">
+                Modifier une adresse
+            </div>
+            <div class="card-body">
+                {{ form_start(form) }}
+                {{ form_rest(form) }}
+                <button type="submit" class="btn btn-success">Modifier l'adresse</button>
+                {{ form_end(form) }}
+            </div>
+        </div>
+    </div>
+{% endblock %}

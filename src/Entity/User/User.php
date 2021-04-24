@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Entity;
+namespace App\Entity\User;
 
 use App\Entity\Shop\Order\Address;
 use App\Entity\Shop\Order\Order;
-use App\Repository\UserRepository;
+use App\Repository\User\UserRepository;
 use DateTime;
 use DateTimeInterface;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -59,6 +59,21 @@ class User implements UserInterface
      * @ORM\OneToMany(targetEntity=Order::class, mappedBy="user")
      */
     private Collection $orders;
+
+    /**
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    private ?string $phoneNumber = null;
+
+    /**
+     * @ORM\Column(type="string", length=255)
+     */
+    private ?string $firstname = null;
+
+    /**
+     * @ORM\Column(type="string", length=255)
+     */
+    private ?string $lastname = null;
 
     public function __construct()
     {
@@ -233,6 +248,42 @@ class User implements UserInterface
                 $order->setUser(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getPhoneNumber(): ?string
+    {
+        return $this->phoneNumber;
+    }
+
+    public function setPhoneNumber(?string $phoneNumber): self
+    {
+        $this->phoneNumber = $phoneNumber;
+
+        return $this;
+    }
+
+    public function getFirstname(): ?string
+    {
+        return $this->firstname;
+    }
+
+    public function setFirstname(string $firstname): self
+    {
+        $this->firstname = $firstname;
+
+        return $this;
+    }
+
+    public function getLastname(): ?string
+    {
+        return $this->lastname;
+    }
+
+    public function setLastname(string $lastname): self
+    {
+        $this->lastname = $lastname;
 
         return $this;
     }

@@ -2,9 +2,10 @@
 
 namespace App\Entity\Shop\Order;
 
-use App\Entity\User;
+use App\Entity\User\User;
 use App\Repository\Shop\Order\AddressRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
@@ -85,7 +86,12 @@ class Address
     /**
      * @ORM\ManyToOne(targetEntity=User::class, inversedBy="addresses")
      */
-    private ?User $user = null;
+    private ?UserInterface $user = null;
+
+    /**
+     * @ORM\Column(type="boolean")
+     */
+    private ?bool $main = false;
 
     public function __toString(): string
     {
@@ -193,14 +199,26 @@ class Address
         return $this;
     }
 
-    public function getUser(): ?User
+    public function getUser(): ?UserInterface
     {
         return $this->user;
     }
 
-    public function setUser(?User $user): self
+    public function setUser(?UserInterface $user): self
     {
         $this->user = $user;
+
+        return $this;
+    }
+
+    public function getMain(): ?bool
+    {
+        return $this->main;
+    }
+
+    public function setMain(bool $main): self
+    {
+        $this->main = $main;
 
         return $this;
     }

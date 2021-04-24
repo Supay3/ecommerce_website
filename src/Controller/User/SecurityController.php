@@ -1,19 +1,34 @@
 <?php
 
-namespace App\Controller;
+namespace App\Controller\User;
 
+use App\Controller\RouteName;
+use App\Repository\Shop\LocaleRepository;
 use LogicException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 
-#[Route('/{_locale}/shop')]
+#[Route('/{_locale}')]
 class SecurityController extends AbstractController
 {
-    #[Route('/login', name: RouteName::APP_LOGIN)]
-    public function login(AuthenticationUtils $authenticationUtils): Response
+    private LocaleRepository $localeRepository;
+
+    public function __construct(LocaleRepository $localeRepository)
     {
+        $this->localeRepository = $localeRepository;
+    }
+
+    #[Route('/login', name: RouteName::APP_LOGIN)]
+    public function login(AuthenticationUtils $authenticationUtils, Request $request): Response
+    {
+        $locale = $request->getLocale();
+        if (!RouteName::checkAuthorizedLocales($this->localeRepository->findAll(), $locale)) {
+            throw new NotFoundHttpException();
+        }
         // if ($this->getUser()) {
         //     return $this->redirectToRoute('target_path');
         // }
