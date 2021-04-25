@@ -60,6 +60,15 @@
                         </div>
                     {% endif %}
                 {% endfor %}
+                {% if app.user.addresses.empty %}
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <p class="card-text">
+                                Vous n'avez pas encore défini d'adresse
+                            </p>
+                        </div>
+                    </div>
+                {% endif %}
                 <a href="{{ path(constant('App\\Controller\\RouteName::USER_PROFILE_ADD_ADDRESS')) }}" class="btn btn-success">Ajouter une adresse +</a>
             </div>
             <div class="card-body" id="infos" hidden>

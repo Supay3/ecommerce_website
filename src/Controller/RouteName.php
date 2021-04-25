@@ -16,6 +16,7 @@ class RouteName
     public const USER_PROFILE_ADD_ADDRESS = 'user_profile_add_address';
     public const USER_PROFILE_EDIT_ADDRESS = 'user_profile_edit_address';
     public const USER_PROFILE_DELETE_ADDRESS = 'user_profile_delete_address';
+    public const USER_CREATE_ACCOUNT = 'user_create_account';
 
     // Routes for the Shop
     public const SHOP_INDEX = 'shop_index';

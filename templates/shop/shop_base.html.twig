@@ -49,7 +49,7 @@
                             <a href="{{ path(constant('App\\Controller\\RouteName::APP_LOGIN')) }}" class="nav-link">Se connecter</a>
                         </li>
                         <li class="nav-item">
-                            <a href="#" class="nav-link">Créer un compte</a>
+                            <a href="{{ path(constant('App\\Controller\\RouteName::USER_CREATE_ACCOUNT')) }}" class="nav-link">Créer un compte</a>
                         </li>
                     {% elseif is_granted('IS_AUTHENTICATED_FULLY') %}
                         <li class="nav-item">
