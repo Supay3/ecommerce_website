@@ -13,19 +13,25 @@ use App\Exception\Shop\Order\ProductAlreadySoldException;
 use App\Exception\Shop\Order\StripeApiException;
 use App\Form\Shop\Order\OrderAddressType;
 use App\Form\Shop\Order\OrderShipmentType;
+use App\Form\User\Checkout\OrderAddressType as OrderAddressAccountType;
 use App\Notification\Shop\Order\OrderNotification;
 use App\Repository\Shop\LocaleRepository;
+use App\Repository\Shop\Order\AddressRepository;
 use App\Repository\Shop\Product\ProductRepository;
 use App\Repository\Shop\Shipment\ShipmentRepository;
+use App\Repository\User\UserRepository;
 use App\Services\Shop\Order\CartService;
 use App\Services\Shop\Order\OrderService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Annotation\Route;
 
+// TODO : l'adresse de facturation doit être la même que l'adresse de livraison dans une commande si pas de choix d'adresse de facturation
+// TODO : refactor absolument, pour le addressWithAccount qui dispose d'une logique quasi-similaire à address
 #[Route('/{_locale}/shop/checkout')]
 class CheckoutController extends AbstractController
 {
@@ -45,6 +51,35 @@ class CheckoutController extends AbstractController
         $this->cartService = $cartService;
         $this->orderService = $orderService;
         $this->localeRepository = $localeRepository;
+    }
+
+    #[Route('/address-account', name: RouteName::ADDRESS_WITH_ACCOUNT)]
+    public function addressWithAccount(Request $request): RedirectResponse|Response
+    {
+        try {
+            if (!RouteName::checkAuthorizedLocales($this->localeRepository->findAll(), $request->getLocale())) {
+                throw new NotFoundHttpException();
+            }
+            $this->cartService->checkCart();
+            $orderSession = $request->getSession()->get('order');
+            $order = $orderSession ?? (new Order())->setUser($this->getUser());
+            $form = $this->createForm(OrderAddressAccountType::class, $order);
+            $form->handleRequest($request);
+
+            if ($form->isSubmitted() && $form->isValid()) {
+                $order->setEmail($this->getUser()->getEmail());
+                $request->getSession()->set('shippingAddress', $order->getShippingAddress());
+                $order->setShippingAddress(null);
+                $request->getSession()->set('order', $order);
+                return $this->redirectToRoute(RouteName::CHECKOUT_SHIPMENT);
+            }
+        } catch (CartEmptyException $e) {
+            $this->addFlash($e::ERROR_NAME, $e->errorMessage());
+            return $this->redirectToRoute(RouteName::CART_INDEX);
+        }
+        return $this->render('user/checkout/address.html.twig', [
+            'form' => $form->createView(),
+        ]);
     }
 
     #[Route('/address', name: RouteName::CHECKOUT_ADDRESS)]
@@ -108,7 +143,9 @@ class CheckoutController extends AbstractController
     public function summary(
         Request $request,
         ProductRepository $productRepository,
-        ShipmentRepository $shipmentRepository
+        ShipmentRepository $shipmentRepository,
+        AddressRepository $addressRepository,
+        UserRepository $userRepository,
     ): Response
     {
         try {
@@ -119,6 +156,13 @@ class CheckoutController extends AbstractController
             $order = $request->getSession()->get('order');
             $shipmentSession = $request->getSession()->get('shipment');
             $order = $order ?? throw new OrderDoNotExistException();
+
+            // TODO : refactor
+            if (!$order->getShippingAddress() && $request->getSession()->has('shippingAddress')) {
+                $shippingAddress = $addressRepository->find($request->getSession()->get('shippingAddress'));
+                $order->setShippingAddress($shippingAddress);
+            }
+
             $shipment = $shipmentSession ? $shipmentRepository->find($request->getSession()->get('shipment')) : throw new NoShipmentException();
             $cartProducts = $this->cartService->getFullCart($productRepository, $request->getLocale());
             $total = $this->cartService->getTotalFromCart($cartProducts);
@@ -145,12 +189,21 @@ class CheckoutController extends AbstractController
         Request $request,
         ProductRepository $productRepository,
         ShipmentRepository $shipmentRepository,
-        OrderNotification $orderNotification
+        OrderNotification $orderNotification,
+        AddressRepository $addressRepository
     ): Response
     {
-        // TODO : send an email on the creation of the order
         $order = $request->getSession()->get('order');
         $shipment = $request->getSession()->get('shipment');
+
+        // TODO : REFACTOR
+        if ($this->isGranted('ROLE_USER') && $request->getSession()->has('shippingAddress')) {
+            $shippingAddress = $addressRepository->find($request->getSession()->get('shippingAddress'));
+            $order->setShippingAddress($shippingAddress);
+            $shippingAddress->setUser($this->getUser());
+            $order->setUser($this->getUser());
+        }
+
         try {
             $order = $order ?? throw new OrderDoNotExistException();
             $shipment = $shipment ? $shipmentRepository->find($request->getSession()->get('shipment')) : throw new NoShipmentException();
@@ -183,11 +236,22 @@ class CheckoutController extends AbstractController
                 return $this->redirectToRoute(RouteName::CHECKOUT_SHIPMENT);
             }
             if ($e instanceof OrderNotificationFailedException) {
+                if ($this->isGranted('ROLE_USER')) {
+                    return $this->redirectToRoute(RouteName::USER_ORDER, [
+                        'id' => $order->getId(),
+                        'number' => $order->getNumber()
+                    ]);
+                }
                 return $this->redirect($this->generateUrl(RouteName::ORDER, ['id' => $order->getId()]) . RouteName::ORDER_TOKEN . $order->getToken());
             }
 
             return $this->redirectToRoute(RouteName::CART_INDEX);
-
+        }
+        if ($this->isGranted('ROLE_USER')) {
+            return $this->redirectToRoute(RouteName::USER_ORDER, [
+                'id' => $order->getId(),
+                'number' => $order->getNumber()
+            ]);
         }
         return $this->redirect($this->generateUrl(RouteName::ORDER, ['id' => $order->getId()]) . RouteName::ORDER_TOKEN . $order->getToken());
     }

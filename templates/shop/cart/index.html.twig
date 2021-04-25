@@ -46,7 +46,11 @@
             </tfoot>
             </table>
             <p>
-                <a href="{{ path(constant('App\\Controller\\RouteName::CHECKOUT_ADDRESS')) }}" class="btn btn-success">Valider le panier</a>
+                {% if is_granted('ROLE_USER') %}
+                    <a href="{{ path(constant('App\\Controller\\RouteName::ADDRESS_WITH_ACCOUNT')) }}" class="btn btn-success">Valider le panier</a>
+                {% elseif is_granted('IS_ANONYMOUS') %}
+                    <a href="{{ path(constant('App\\Controller\\RouteName::CHECKOUT_ADDRESS')) }}" class="btn btn-success">Valider le panier</a>
+                {% endif %}
             </p>
             <form action="{{ path(constant('App\\Controller\\RouteName::CART_REMOVE_ALL')) }}" method="POST">
                 <input type="hidden" name="_token" value="{{ csrf_token('cart-remove-all') }}">

@@ -10,6 +10,7 @@ use DateTimeInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
@@ -54,10 +55,6 @@ class Order
     /**
      * @ORM\Column(type="string", length=255)
      */
-    #[
-        Assert\Email,
-        Assert\NotBlank
-    ]
     private ?string $email = null;
 
     /**
@@ -110,7 +107,6 @@ class Order
      * @ORM\ManyToOne(targetEntity=Address::class, cascade={"persist", "remove"})
      * @ORM\JoinColumn(nullable=false)
      */
-    #[Assert\NotBlank]
     private ?Address $shippingAddress = null;
 
     /**
@@ -126,7 +122,7 @@ class Order
     /**
      * @ORM\ManyToOne(targetEntity=User::class, inversedBy="orders")
      */
-    private ?User $user = null;
+    private ?UserInterface $user = null;
 
     public function __construct()
     {
@@ -354,12 +350,12 @@ class Order
         return $this;
     }
 
-    public function getUser(): ?User
+    public function getUser(): ?UserInterface
     {
         return $this->user;
     }
 
-    public function setUser(?User $user): self
+    public function setUser(?UserInterface $user): self
     {
         $this->user = $user;
 

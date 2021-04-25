@@ -1,0 +1,40 @@
+{% extends 'shop/shop_base.html.twig' %}
+
+{% block title 'Vos commandes' %}
+
+{% block body %}
+    <div class="container mt-4">
+        <h1>Vos commandes :</h1>
+        <table class="table table-bordered">
+            <thead>
+            <tr>
+                <th>Commande n°</th>
+                <th>Date de la commande</th>
+                <th>Prix de la commande</th>
+                <th>Etat de la commande</th>
+                <th colspan="2">Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for order in app.user.orders %}
+            <tr>
+                <td>{{ order.number }}</td>
+                <td>{{ order.createdAt|date }}</td>
+                <td>{{ order.totalWithShipment|number_format(2) }} €</td>
+                <td>{{ orderState[order.state] }}</td>
+                <td colspan="2">
+                    <a href="{{ path(constant('App\\Controller\\RouteName::USER_ORDER'), {id: order.id, number: order.number}) }}" class="btn btn-primary">Voir la commande</a>
+                    {% if order.state <= 1 %}
+                        {% include 'shop/order/_cancel_order.html.twig' %}
+                    {% elseif order.state == 5 %}
+                        <span class="badge badge-secondary">Commande annulée</span>
+                    {% elseif order.state == 6 %}
+                        <span class="badge badge-secondary">Commande remboursée</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}

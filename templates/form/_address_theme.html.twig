@@ -1,0 +1,22 @@
+{% block entity_row %}
+    <fieldset class="form-group">
+        <legend class="col-form-label required">{{ form.vars.name }}</legend>
+        <div id="{{ form.vars.id }}">
+            <div class="row">
+                {% for formChild in form.children %}
+                    <div class="col-sm-6 form-check card">
+                        <div class="card-body">
+                            <input type="radio" id="{{ formChild.vars.id }}" name="{{ formChild.vars.full_name }}" required="required" class="form-check-input" value="{{ formChild.vars.value }}">
+                            <label class="form-check-label required" for="{{ formChild.vars.id }}">
+                                {{ formChild.parent.vars.choices[formChild.vars.value].data.firstname }} {{ formChild.parent.vars.choices[formChild.vars.value].data.lastname }},<br>
+                                {{ formChild.parent.vars.choices[formChild.vars.value].data.street }},<br>
+                                {{ formChild.parent.vars.choices[formChild.vars.value].data.postcode|number_format(0, '', ' ') }},<br>
+                                {{ formChild.parent.vars.choices[formChild.vars.value].data.city }}
+                            </label>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </fieldset>
+{% endblock %}

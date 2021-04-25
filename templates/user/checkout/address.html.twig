@@ -1,0 +1,15 @@
+{% extends 'shop/shop_base.html.twig' %}
+
+{% block title 'Choisissez une adresse' %}
+
+{% form_theme form 'form/_address_theme.html.twig' %}
+
+{% block body %}
+    <div class="container mt-4">
+        {{ form_start(form) }}
+            {{ form_row(form.shippingAddress) }}
+            {{ form_rest(form) }}
+            <button type="submit" class="btn btn-primary mt-4">Valider</button>
+        {{ form_end(form) }}
+    </div>
+{% endblock %}

@@ -5,7 +5,9 @@
 {% block body %}
     <div class="container">
         {% if order.state < 2 %}
-            {% include('shop/order/_cancel_order.html.twig') %}
+            <div class="mt-4 mb-4">
+                {% include('shop/order/_cancel_order.html.twig') %}
+            </div>
         {% endif %}
         {% for label, messages in app.flashes([constant('App\\Controller\\RouteName::BASIC_SUCCESS'), constant('App\\Controller\\RouteName::BASIC_ERROR')]) %}
                 {% for message in messages %}

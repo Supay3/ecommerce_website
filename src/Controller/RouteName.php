@@ -17,6 +17,8 @@ class RouteName
     public const USER_PROFILE_EDIT_ADDRESS = 'user_profile_edit_address';
     public const USER_PROFILE_DELETE_ADDRESS = 'user_profile_delete_address';
     public const USER_CREATE_ACCOUNT = 'user_create_account';
+    public const USER_ORDER_INDEX = 'user_order_index';
+    public const USER_ORDER = 'user_order';
 
     // Routes for the Shop
     public const SHOP_INDEX = 'shop_index';
@@ -29,6 +31,7 @@ class RouteName
     public const CHECKOUT_VALIDATION = 'checkout_validation';
     public const CHECKOUT_PAY = 'checkout_pay';
     public const CHECKOUT_REMOVE_BILLING_ADDRESS = 'checkout_remove_billing_address';
+    public const ADDRESS_WITH_ACCOUNT = 'address_with_account';
 
     // Routes for the Cart
     public const CART_INDEX = 'cart_index';
@@ -44,6 +47,7 @@ class RouteName
     // Token for the uri
     public const ORDER_TOKEN = '?token=';
     public const ORDER_SESSION_ID = '&session_id={CHECKOUT_SESSION_ID}';
+    public const ORDER_SESSION_ID_MARK = '?session_id={CHECKOUT_SESSION_ID}';
 
     // Errors messages in the Controllers
     public const BASIC_ERROR = 'danger';

@@ -37,5 +37,4 @@ class CreateAccountController extends AbstractController
             'form' => $form->createView(),
         ]);
     }
-
 }

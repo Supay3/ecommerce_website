@@ -64,6 +64,12 @@ class OrderController extends AbstractController
             // TODO handle this error message in views
             $this->addFlash($e::ERROR_NAME, $e->errorMessage());
         }
+        if ($this->isGranted('ROLE_USER')) {
+            return $this->redirectToRoute(RouteName::USER_ORDER, [
+                'id' => $order->getId(),
+                'number' => $order->getNumber()
+            ]);
+        }
         return $this->render('shop/order/order.html.twig', [
             'order' => $order,
             'orderState' => Order::STATE,
@@ -73,6 +79,7 @@ class OrderController extends AbstractController
     #[Route('/cancel/{id}', name: RouteName::ORDER_CANCEL, methods: ['POST'])]
     public function cancelOrder(Order $order, Request $request): RedirectResponse
     {
+        // TODO : ajouter de la sécurité pour les users
         if (!RouteName::checkAuthorizedLocales($this->localeRepository->findAll(), $request->getLocale())) {
             throw new NotFoundHttpException();
         }
@@ -82,6 +89,7 @@ class OrderController extends AbstractController
                     $this->orderService->manageRefundStripeApi($order);
                 } else {
                     $this->orderService->cancelOrder($order);
+                    $order->setState(5);
                     $this->getDoctrine()->getManager()->flush();
                 }
                 $this->addFlash('success', 'Votre commande a bien été annulée. Si vous aviez déjà payé vous serez remboursé(e) dans les 5 à 10 jours suivant l\'annulation');
@@ -90,6 +98,9 @@ class OrderController extends AbstractController
                 $this->addFlash($e::ERROR_NAME, $e->errorMessage());
                 return $this->redirect($this->generateUrl(RouteName::ORDER, ['id' => $order->getId()]) . RouteName::ORDER_TOKEN . $order->getToken());
             }
+        }
+        if ($this->isGranted('ROLE_USER')) {
+            return $this->redirectToRoute(RouteName::USER_ORDER_INDEX);
         }
         return $this->redirect($this->generateUrl(RouteName::ORDER, ['id' => $order->getId()]) . RouteName::ORDER_TOKEN . $order->getToken());
     }

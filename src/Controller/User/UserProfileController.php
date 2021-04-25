@@ -6,6 +6,7 @@ namespace App\Controller\User;
 
 use App\Controller\RouteName;
 use App\Entity\Shop\Order\Address;
+use App\Entity\Shop\Order\Order;
 use App\Form\User\Profile\UserAddressType;
 use Doctrine\ORM\EntityManagerInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
@@ -23,6 +24,7 @@ use Symfony\Component\Routing\Annotation\Route;
 #[Route('/{_locale}/profile')]
 class UserProfileController extends AbstractController
 {
+
     #[Route('/', name: RouteName::USER_PROFILE_INDEX)]
     public function profileIndex(): Response
     {
@@ -69,7 +71,11 @@ class UserProfileController extends AbstractController
     }
 
     #[Route('/delete-address/{id}', name: RouteName::USER_PROFILE_DELETE_ADDRESS)]
-    public function deleteAddress(Address $address, Request $request, EntityManagerInterface $entityManager): NotFoundHttpException|RedirectResponse
+    public function deleteAddress(
+        Address $address,
+        Request $request,
+        EntityManagerInterface $entityManager
+    ): NotFoundHttpException|RedirectResponse
     {
         if ($address->getUser() !== $this->getUser()) {
             return new NotFoundHttpException();
@@ -79,5 +85,31 @@ class UserProfileController extends AbstractController
             $entityManager->flush();
         }
         return $this->redirectToRoute(RouteName::USER_PROFILE_INDEX);
+    }
+
+    #[Route('/order-index', name: RouteName::USER_ORDER_INDEX)]
+    public function orderIndex(): Response
+    {
+        return $this->render('user/order/index.html.twig', [
+            'orderState' => Order::STATE,
+        ]);
+    }
+
+    #[Route('/order-{id}-{number}', name: RouteName::USER_ORDER)]
+    public function order(Order $order, $number): RedirectResponse|Response
+    {
+        if ($order->getUser() !== $this->getUser()) {
+            throw new NotFoundHttpException();
+        }
+        if ($number !== $order->getNumber()) {
+            return $this->redirectToRoute(RouteName::USER_ORDER, [
+                'id' => $order->getId(),
+                'number' => $number
+            ]);
+        }
+        return $this->render('shop/order/order.html.twig', [
+            'order' => $order,
+            'orderState' => $order::STATE,
+        ]);
     }
 }
