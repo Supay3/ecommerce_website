@@ -128,9 +128,11 @@ class CheckoutController extends AbstractController
             if (!RouteName::checkAuthorizedLocales($this->localeRepository->findAll(), $request->getLocale())) {
                 throw new NotFoundHttpException();
             }
+
             $this->cartService->checkCart();
+            $this->orderService->checkOrder();
+
             $order = $request->getSession()->get('order');
-            $order = $order ?? throw new OrderDoNotExistException();
             if ($this->isGranted('ROLE_USER')) {
                 $request->getSession()->get('shippingAddress') ?? throw new UserHasNoAddressException();
             }
@@ -170,9 +172,10 @@ class CheckoutController extends AbstractController
                 throw new NotFoundHttpException();
             }
             $this->cartService->checkCart();
+            $this->orderService->checkOrder();
+
             $order = $request->getSession()->get('order');
             $shipmentSession = $request->getSession()->get('shipment');
-            $order = $order ?? throw new OrderDoNotExistException();
             $shippingAddress = null;
             $billingAddress = null;
 
@@ -217,10 +220,10 @@ class CheckoutController extends AbstractController
         OrderNotification $orderNotification
     ): Response
     {
-        $order = $request->getSession()->get('order');
 
         try {
-            $order = $order ?? throw new OrderDoNotExistException();
+            $this->orderService->checkOrder();
+            $order = $request->getSession()->get('order');
 
             $this->cartService->checkCart();
             $cartProducts = $this->cartService->getFullCart($productRepository);
@@ -244,11 +247,15 @@ class CheckoutController extends AbstractController
             |CartEmptyException
             |NoShipmentException
             |OrderDoNotExistException
-            |OrderNotificationFailedException $e
+            |OrderNotificationFailedException
+            |UserHasNoAddressException $e
         ) {
             $this->addFlash($e::ERROR_NAME, $e->errorMessage());
             if ($e instanceof NoShipmentException) {
                 return $this->redirectToRoute(RouteName::CHECKOUT_SHIPMENT);
+            }
+            if ($e instanceof UserHasNoAddressException) {
+                return $this->redirectToRoute(RouteName::CHECKOUT_ADDRESS);
             }
             if ($e instanceof OrderNotificationFailedException) {
                 if ($this->isGranted('ROLE_USER')) {

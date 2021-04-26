@@ -9,6 +9,7 @@ use App\Entity\Shop\Order\Order;
 use App\Entity\Shop\Order\OrderNumber;
 use App\Entity\Shop\Order\ProductSold;
 use App\Exception\Shop\Order\NoShipmentException;
+use App\Exception\Shop\Order\OrderDoNotExistException;
 use App\Exception\Shop\Order\OrderHasNoProductException;
 use App\Exception\Shop\Order\ProductAlreadySoldException;
 use App\Exception\Shop\Order\RefundFailedException;
@@ -318,6 +319,16 @@ class OrderService
             $this->entityManager->flush();
         } else {
             throw new OrderHasNoProductException();
+        }
+    }
+
+    /**
+     * @throws OrderDoNotExistException If the Order doesn't exist in session
+     */
+    public function checkOrder(): void
+    {
+        if (!$this->requestStack->getCurrentRequest()->getSession()->has('order')) {
+            throw new OrderDoNotExistException();
         }
     }
 
