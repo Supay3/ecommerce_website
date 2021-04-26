@@ -8,12 +8,15 @@ use App\Controller\RouteName;
 use App\Entity\Shop\Order\Order;
 use App\Entity\Shop\Order\OrderNumber;
 use App\Entity\Shop\Order\ProductSold;
-use App\Entity\Shop\Shipment\Shipment;
+use App\Exception\Shop\Order\NoShipmentException;
 use App\Exception\Shop\Order\OrderHasNoProductException;
 use App\Exception\Shop\Order\ProductAlreadySoldException;
 use App\Exception\Shop\Order\RefundFailedException;
 use App\Exception\Shop\Order\StripeApiException;
+use App\Exception\Shop\Order\User\UserHasNoAddressException;
+use App\Repository\Shop\Order\AddressRepository;
 use App\Repository\Shop\Order\OrderNumberRepository;
+use App\Repository\Shop\Shipment\ShipmentRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Stripe\Checkout\Session;
@@ -23,6 +26,7 @@ use Stripe\Stripe;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Symfony\Component\Security\Core\Security;
 
 class OrderService
 {
@@ -51,11 +55,29 @@ class OrderService
      */
     private RequestStack $requestStack;
 
+    /**
+     * @var Security
+     */
+    private Security $security;
+
+    /**
+     * @var AddressRepository
+     */
+    private AddressRepository $addressRepository;
+
+    /**
+     * @var ShipmentRepository
+     */
+    private ShipmentRepository $shipmentRepository;
+
     public function __construct(
         EntityManagerInterface $entityManager,
         OrderNumberRepository $numberRepository,
         UrlGeneratorInterface $urlGenerator,
         RequestStack $requestStack,
+        Security $security,
+        AddressRepository $addressRepository,
+        ShipmentRepository $shipmentRepository,
         string $stripeKey
     )
     {
@@ -64,17 +86,20 @@ class OrderService
         $this->stripeKey = $stripeKey;
         $this->urlGenerator = $urlGenerator;
         $this->requestStack = $requestStack;
+        $this->security = $security;
+        $this->addressRepository = $addressRepository;
+        $this->shipmentRepository = $shipmentRepository;
     }
 
     /**
      * Manages the Order by adding the total items sold, the total prices, the Shipment, the state, the token and the locale
      *
      * @param Order $order The current Order
-     * @param Shipment $shipment The current Shipment the Customer has chosen
-     * @param string $locale The current locale in the format 'fr_FR' for example
-     * @throws ProductAlreadySoldException if the Product has no stock
+     * @throws NoShipmentException If there is no shipment in the session
+     * @throws ProductAlreadySoldException If the Product has no stock
+     * @throws UserHasNoAddressException If there is no Address in the session
      */
-    public function createOrder(Order $order, Shipment $shipment, string $locale)
+    public function createOrder(Order $order)
     {
         $productsSold = [];
         try {
@@ -96,15 +121,40 @@ class OrderService
                     throw new Exception($itemTranslation);
                 }
             }
+            $shipment =
+                $this->requestStack->getCurrentRequest()->getSession()->get('shipment') ?
+                    $this->shipmentRepository->find($this->requestStack->getCurrentRequest()->getSession()->get('shipment')) :
+                    throw new NoShipmentException()
+            ;
             $order
                 ->setToken($this->generateOrderToken())
                 ->setState(0)
-                ->setLocaleCode($locale)
+                ->setLocaleCode($this->requestStack->getCurrentRequest()->getLocale())
                 ->setShipment($shipment)
                 ->setTotalWithShipment($order->getTotal() + $order->getShipment()->getPrice())
             ;
-        } catch (Exception $e) {
+            if ($this->security->isGranted('ROLE_USER') && $this->requestStack->getCurrentRequest()->getSession()->get('shippingAddress')) {
+                $shippingAddress = $this->addressRepository->find($this->requestStack->getCurrentRequest()->getSession()->get('shippingAddress'));
+                $billingAddress = $this->requestStack->getCurrentRequest()->getSession()->get('billingAddress') ?
+                    $this->addressRepository->find($this->requestStack->getCurrentRequest()->getSession()->get('billingAddress')) :
+                    $shippingAddress
+                ;
+                $order
+                    ->setShippingAddress($shippingAddress)
+                    ->setBillingAddress($billingAddress)
+                    ->setUser($this->security->getUser())
+                ;
+            } elseif ($this->security->isGranted('ROLE_USER') && !$this->requestStack->getCurrentRequest()->getSession()->has('shippingAddress')) {
+                throw new UserHasNoAddressException();
+            }
+        } catch (Exception|NoShipmentException $e) {
             $this->cancelOrderBeforePersist($order, $productsSold);
+            if ($e instanceof NoShipmentException) {
+                throw new NoShipmentException();
+            }
+            if ($e instanceof UserHasNoAddressException) {
+                throw new UserHasNoAddressException();
+            }
             throw new ProductAlreadySoldException($e->getMessage());
         }
         $order->setNumber(date('Ymd') . $this->generateOrderNumber());
@@ -289,6 +339,13 @@ class OrderService
             ->setTotalWithShipment(null)
             ->setNumber(null)
         ;
+        if ($this->security->isGranted('ROLE_USER')) {
+            $order
+                ->setBillingAddress(null)
+                ->setShippingAddress(null)
+                ->setUser(null)
+            ;
+        }
         $this->cancelProductsSold($order, $productsSold);
     }
 

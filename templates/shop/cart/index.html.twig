@@ -1,6 +1,6 @@
 {% extends 'shop/shop_base.html.twig' %}
 
-{% block title %}{% endblock %}
+{% block title 'Votre panier' %}
 
 {% block body %}
     <div class="container mt-4">
@@ -47,7 +47,7 @@
             </table>
             <p>
                 {% if is_granted('ROLE_USER') %}
-                    <a href="{{ path(constant('App\\Controller\\RouteName::ADDRESS_WITH_ACCOUNT')) }}" class="btn btn-success">Valider le panier</a>
+                    <a href="{{ path(constant('App\\Controller\\RouteName::CHECKOUT_ADDRESS')) }}" class="btn btn-success">Valider le panier</a>
                 {% elseif is_granted('IS_ANONYMOUS') %}
                     <a href="{{ path(constant('App\\Controller\\RouteName::CHECKOUT_CHOOSE_ACCOUNT')) }}" class="btn btn-success">Valider le panier</a>
                 {% endif %}

@@ -11,6 +11,7 @@ use App\Exception\Shop\Order\OrderDoNotExistException;
 use App\Exception\Shop\Order\OrderHasNoProductException;
 use App\Exception\Shop\Order\ProductAlreadySoldException;
 use App\Exception\Shop\Order\StripeApiException;
+use App\Exception\Shop\Order\User\UserHasNoAddressException;
 use App\Form\Shop\Order\OrderAddressType;
 use App\Form\Shop\Order\OrderShipmentType;
 use App\Form\User\Checkout\OrderAddressType as OrderAddressAccountType;
@@ -54,10 +55,10 @@ class CheckoutController extends AbstractController
     }
 
     #[Route('/choose-account', name: RouteName::CHECKOUT_CHOOSE_ACCOUNT)]
-public function chooseAccount(Request $request, AuthenticationUtils $authenticationUtils): RedirectResponse|Response
+    public function chooseAccount(Request $request, AuthenticationUtils $authenticationUtils): RedirectResponse|Response
     {
         if ($this->isGranted('ROLE_USER')) {
-            return $this->redirectToRoute(RouteName::ADDRESS_WITH_ACCOUNT);
+            return $this->redirectToRoute(RouteName::CHECKOUT_ADDRESS);
         }
         if (!RouteName::checkAuthorizedLocales($this->localeRepository->findAll(), $request->getLocale())) {
             throw new NotFoundHttpException();
@@ -76,35 +77,6 @@ public function chooseAccount(Request $request, AuthenticationUtils $authenticat
         ]);
     }
 
-    #[Route('/address-account', name: RouteName::ADDRESS_WITH_ACCOUNT)]
-    public function addressWithAccount(Request $request): RedirectResponse|Response
-    {
-        try {
-            if (!RouteName::checkAuthorizedLocales($this->localeRepository->findAll(), $request->getLocale())) {
-                throw new NotFoundHttpException();
-            }
-            $this->cartService->checkCart();
-            $orderSession = $request->getSession()->get('order');
-            $order = $orderSession ?? (new Order())->setUser($this->getUser());
-            $form = $this->createForm(OrderAddressAccountType::class, $order);
-            $form->handleRequest($request);
-
-            if ($form->isSubmitted() && $form->isValid()) {
-                $order->setEmail($this->getUser()->getEmail());
-                $request->getSession()->set('shippingAddress', $order->getShippingAddress());
-                $order->setShippingAddress(null);
-                $request->getSession()->set('order', $order);
-                return $this->redirectToRoute(RouteName::CHECKOUT_SHIPMENT);
-            }
-        } catch (CartEmptyException $e) {
-            $this->addFlash($e::ERROR_NAME, $e->errorMessage());
-            return $this->redirectToRoute(RouteName::CART_INDEX);
-        }
-        return $this->render('user/checkout/address.html.twig', [
-            'form' => $form->createView(),
-        ]);
-    }
-
     #[Route('/address', name: RouteName::CHECKOUT_ADDRESS)]
     public function address(Request $request): Response
     {
@@ -115,18 +87,35 @@ public function chooseAccount(Request $request, AuthenticationUtils $authenticat
             $this->cartService->checkCart();
             $orderSession = $request->getSession()->get('order');
             $order = $orderSession ?? new Order();
-            $form = $this->createForm(OrderAddressType::class, $order);
+            if ($this->isGranted('ROLE_USER')) {
+                $order->setUser($this->getUser());
+                $form = $this->createForm(OrderAddressAccountType::class, $order);
+            } else {
+                $form = $this->createForm(OrderAddressType::class, $order);
+            }
             $form->handleRequest($request);
 
             if ($form->isSubmitted() && $form->isValid()) {
+                if ($this->isGranted('ROLE_USER')) {
+                    $order->setEmail($this->getUser()->getEmail());
+                    $order->getBillingAddress() ?? $request->getSession()->set('billingAddress', $order->getBillingAddress());
+                    $request->getSession()->set('shippingAddress', $order->getShippingAddress());
+                    $order->setShippingAddress(null);
+                    $order->setBillingAddress(null);
+                }
                 $request->getSession()->set('order', $order);
                 return $this->redirectToRoute(RouteName::CHECKOUT_SHIPMENT);
             }
+
         } catch (CartEmptyException $e) {
             $this->addFlash($e::ERROR_NAME, $e->errorMessage());
             return $this->redirectToRoute(RouteName::CART_INDEX);
         }
-
+        if ($this->isGranted('ROLE_USER')) {
+            return $this->render('user/checkout/address.html.twig', [
+                'form' => $form->createView(),
+            ]);
+        }
         return $this->render('shop/checkout/address.html.twig', [
             'form' => $form->createView(),
         ]);
@@ -142,6 +131,9 @@ public function chooseAccount(Request $request, AuthenticationUtils $authenticat
             $this->cartService->checkCart();
             $order = $request->getSession()->get('order');
             $order = $order ?? throw new OrderDoNotExistException();
+            if ($this->isGranted('ROLE_USER')) {
+                $request->getSession()->get('shippingAddress') ?? throw new UserHasNoAddressException();
+            }
 
             $form = $this->createForm(OrderShipmentType::class, $order);
             $form->handleRequest($request);
@@ -153,8 +145,11 @@ public function chooseAccount(Request $request, AuthenticationUtils $authenticat
                 return $this->redirectToRoute(RouteName::CHECKOUT_SUMMARY);
             }
 
-        } catch (CartEmptyException|OrderDoNotExistException $e) {
+        } catch (CartEmptyException|OrderDoNotExistException|UserHasNoAddressException $e) {
             $this->addFlash($e::ERROR_NAME, $e->errorMessage());
+            if ($e instanceof UserHasNoAddressException) {
+                $this->redirectToRoute(RouteName::CHECKOUT_ADDRESS);
+            }
             return $this->redirectToRoute(RouteName::CART_INDEX);
         }
         return $this->render('shop/checkout/shipment.html.twig', [
@@ -178,11 +173,15 @@ public function chooseAccount(Request $request, AuthenticationUtils $authenticat
             $order = $request->getSession()->get('order');
             $shipmentSession = $request->getSession()->get('shipment');
             $order = $order ?? throw new OrderDoNotExistException();
+            $shippingAddress = null;
+            $billingAddress = null;
 
             // TODO : refactor
-            if (!$order->getShippingAddress() && $request->getSession()->has('shippingAddress')) {
+            if (!$order->getShippingAddress() && !$order->getBillingAddress() && $request->getSession()->has('shippingAddress') && $this->isGranted('ROLE_USER')) {
                 $shippingAddress = $addressRepository->find($request->getSession()->get('shippingAddress'));
-                $order->setShippingAddress($shippingAddress);
+                $billingAddress = $request->getSession()->get('billingAddress') ? $addressRepository->find($request->getSession()->get('billingAddress')) : $shippingAddress;
+            } elseif ($this->isGranted('ROLE_USER') && !$request->getSession()->has('shippingAddress')) {
+                throw new UserHasNoAddressException();
             }
 
             $shipment = $shipmentSession ? $shipmentRepository->find($request->getSession()->get('shipment')) : throw new NoShipmentException();
@@ -190,10 +189,13 @@ public function chooseAccount(Request $request, AuthenticationUtils $authenticat
             $total = $this->cartService->getTotalFromCart($cartProducts);
             $totalShipment = $shipment->getPrice();
             $totalWithShipment = $total + $shipment->getPrice();
-        } catch (CartEmptyException|NoShipmentException|OrderDoNotExistException $e) {
+        } catch (CartEmptyException|NoShipmentException|OrderDoNotExistException|UserHasNoAddressException $e) {
             $this->addFlash($e::ERROR_NAME, $e->errorMessage());
             if ($e instanceof NoShipmentException) {
                 return $this->redirectToRoute(RouteName::CHECKOUT_SHIPMENT);
+            }
+            if ($e instanceof UserHasNoAddressException) {
+                return $this->redirectToRoute(RouteName::CHECKOUT_ADDRESS);
             }
             return $this->redirectToRoute(RouteName::CART_INDEX);
         }
@@ -203,6 +205,8 @@ public function chooseAccount(Request $request, AuthenticationUtils $authenticat
             'total' => $total,
             'totalShipment' => $totalShipment,
             'totalWithShipment' => $totalWithShipment,
+            'shippingAddress' => $shippingAddress,
+            'billingAddress' => $billingAddress,
         ]);
     }
 
@@ -210,32 +214,21 @@ public function chooseAccount(Request $request, AuthenticationUtils $authenticat
     public function validate(
         Request $request,
         ProductRepository $productRepository,
-        ShipmentRepository $shipmentRepository,
-        OrderNotification $orderNotification,
-        AddressRepository $addressRepository
+        OrderNotification $orderNotification
     ): Response
     {
         $order = $request->getSession()->get('order');
-        $shipment = $request->getSession()->get('shipment');
-
-        // TODO : REFACTOR
-        if ($this->isGranted('ROLE_USER') && $request->getSession()->has('shippingAddress')) {
-            $shippingAddress = $addressRepository->find($request->getSession()->get('shippingAddress'));
-            $order->setShippingAddress($shippingAddress);
-            $shippingAddress->setUser($this->getUser());
-            $order->setUser($this->getUser());
-        }
 
         try {
             $order = $order ?? throw new OrderDoNotExistException();
-            $shipment = $shipment ? $shipmentRepository->find($request->getSession()->get('shipment')) : throw new NoShipmentException();
+
             $this->cartService->checkCart();
             $cartProducts = $this->cartService->getFullCart($productRepository);
             $entityManager = $this->getDoctrine()->getManager();
 
             $this->orderService->addProductsSold($cartProducts, $order);
             $this->orderService->verifyOrderProducts($order);
-            $this->orderService->createOrder($order, $shipment, $request->getLocale());
+            $this->orderService->createOrder($order);
 
             $entityManager->persist($order);
             $entityManager->flush();

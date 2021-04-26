@@ -1,6 +1,6 @@
 {% extends 'shop/shop_base.html.twig' %}
 
-{% block title %}Récapitulatif de votre commande{% endblock %}
+{% block title 'Récapitulatif de votre commande' %}
 
 {% block body %}
     <div class="container mt-4">
@@ -11,20 +11,37 @@
                 </div>
             {% endfor %}
         {% endfor %}
-        <div class="card mt-4 mb-4">
-            <div class="card-body">
-                <h5 class="card-title">Adresse de livraison{% if order.billingAddress is empty %} et de facturation{% endif %} :</h5>
-                <p class="card-text">{{ order.shippingAddress.firstname }} {{ order.shippingAddress.lastname }}</p>
-                <p class="card-text">{{ order.shippingAddress.street }}, <br> {{ order.shippingAddress.postcode|number_format(0, '', ' ') }}, <br> {{ order.shippingAddress.city }}</p>
-            </div>
-            {% if order.billingAddress %}
+        {% if app.user and is_granted('ROLE_USER') %}
+            <div class="card mt-4 mb-4">
                 <div class="card-body">
-                    <h5 class="card-title">Adresse de facturation :</h5>
-                    <p class="card-text">{{ order.billingAddress.firstname }} {{ order.billingAddress.lastname }}</p>
-                    <p class="card-text">{{ order.billingAddress.street }}, <br> {{ order.billingAddress.postcode|number_format(0, '', ' ') }}, <br> {{ order.billingAddress.city }}</p>
+                    <h5 class="card-title">Adresse de livraison{% if billingAddress is empty %} et de facturation{% endif %} :</h5>
+                    <p class="card-text">{{ shippingAddress.firstname }} {{ shippingAddress.lastname }}</p>
+                    <p class="card-text">{{ shippingAddress.street }}, <br> {{ shippingAddress.postcode|number_format(0, '', ' ') }}, <br> {{ shippingAddress.city }}</p>
                 </div>
-            {% endif %}
-        </div>
+                {% if billingAddress %}
+                    <div class="card-body">
+                        <h5 class="card-title">Adresse de facturation :</h5>
+                        <p class="card-text">{{ billingAddress.firstname }} {{ billingAddress.lastname }}</p>
+                        <p class="card-text">{{ billingAddress.street }}, <br> {{ billingAddress.postcode|number_format(0, '', ' ') }}, <br> {{ billingAddress.city }}</p>
+                    </div>
+                {% endif %}
+            </div>
+        {% else %}
+            <div class="card mt-4 mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">Adresse de livraison{% if order.billingAddress is empty %} et de facturation{% endif %} :</h5>
+                    <p class="card-text">{{ order.shippingAddress.firstname }} {{ order.shippingAddress.lastname }}</p>
+                    <p class="card-text">{{ order.shippingAddress.street }}, <br> {{ order.shippingAddress.postcode|number_format(0, '', ' ') }}, <br> {{ order.shippingAddress.city }}</p>
+                </div>
+                {% if order.billingAddress %}
+                    <div class="card-body">
+                        <h5 class="card-title">Adresse de facturation :</h5>
+                        <p class="card-text">{{ order.billingAddress.firstname }} {{ order.billingAddress.lastname }}</p>
+                        <p class="card-text">{{ order.billingAddress.street }}, <br> {{ order.billingAddress.postcode|number_format(0, '', ' ') }}, <br> {{ order.billingAddress.city }}</p>
+                    </div>
+                {% endif %}
+            </div>
+        {% endif %}
         <table class="table">
             <thead>
             <tr>

@@ -32,7 +32,6 @@ class RouteName
     public const CHECKOUT_VALIDATION = 'checkout_validation';
     public const CHECKOUT_PAY = 'checkout_pay';
     public const CHECKOUT_REMOVE_BILLING_ADDRESS = 'checkout_remove_billing_address';
-    public const ADDRESS_WITH_ACCOUNT = 'address_with_account';
 
     // Routes for the Cart
     public const CART_INDEX = 'cart_index';

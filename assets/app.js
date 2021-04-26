@@ -14,9 +14,12 @@ import './bootstrap';
 import $ from 'jquery';
 import 'select2';
 $(document).ready(function () {
+    $('select').select2({
+        allowClear: true,
+    });
     $('#product_search_productCategories').select2({
         placeholder: $('#product_search_productCategories').attr('placeholder'),
-        allowClear: true,
+        allowClear: false,
     });
     $('#product_search_productTypes').select2({
         placeholder: $('#product_search_productTypes').attr('placeholder'),
