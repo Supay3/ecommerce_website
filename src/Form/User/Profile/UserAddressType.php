@@ -40,6 +40,7 @@ class UserAddressType extends AbstractType
                 'required' => false,
             ])
             ->add('main', CheckboxType::class, [
+                // TODO : ajouter une constraint pour obliger l'utilisateur à avoir UNE adresse principale (pas plus, pas moins)
                 'required' => false,
             ])
         ;

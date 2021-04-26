@@ -8,6 +8,7 @@ use App\Controller\RouteName;
 use App\Entity\Shop\Order\Address;
 use App\Entity\Shop\Order\Order;
 use App\Form\User\Profile\UserAddressType;
+use App\Repository\Shop\LocaleRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -25,15 +26,30 @@ use Symfony\Component\Routing\Annotation\Route;
 class UserProfileController extends AbstractController
 {
 
-    #[Route('/', name: RouteName::USER_PROFILE_INDEX)]
-    public function profileIndex(): Response
+    private LocaleRepository $localeRepository;
+
+    public function __construct(LocaleRepository $localeRepository)
     {
+        $this->localeRepository = $localeRepository;
+    }
+
+    #[Route('/', name: RouteName::USER_PROFILE_INDEX)]
+    public function profileIndex(Request $request): Response
+    {
+        $locale = $request->getLocale();
+        if (!RouteName::checkAuthorizedLocales($this->localeRepository->findAll(), $locale)) {
+            throw new NotFoundHttpException();
+        }
         return $this->render('user/profile/index.html.twig');
     }
 
     #[Route('/add-address', name: RouteName::USER_PROFILE_ADD_ADDRESS)]
     public function addAddress(Request $request, EntityManagerInterface $entityManager): Response
     {
+        $locale = $request->getLocale();
+        if (!RouteName::checkAuthorizedLocales($this->localeRepository->findAll(), $locale)) {
+            throw new NotFoundHttpException();
+        }
         $address = new Address();
         $form = $this->createForm(UserAddressType::class, $address);
         $form->handleRequest($request);
@@ -53,10 +69,18 @@ class UserProfileController extends AbstractController
     }
 
     #[Route('/edit-address/{id}', name: RouteName::USER_PROFILE_EDIT_ADDRESS)]
-    public function editAddress(Address $address, Request $request, EntityManagerInterface $entityManager): NotFoundHttpException|RedirectResponse|Response
+    public function editAddress(
+        Address $address,
+        Request $request,
+        EntityManagerInterface $entityManager
+    ): NotFoundHttpException|RedirectResponse|Response
     {
         if ($address->getUser() !== $this->getUser()) {
             return new NotFoundHttpException();
+        }
+        $locale = $request->getLocale();
+        if (!RouteName::checkAuthorizedLocales($this->localeRepository->findAll(), $locale)) {
+            throw new NotFoundHttpException();
         }
         $form = $this->createForm(UserAddressType::class, $address);
         $form->handleRequest($request);
@@ -88,16 +112,27 @@ class UserProfileController extends AbstractController
     }
 
     #[Route('/order-index', name: RouteName::USER_ORDER_INDEX)]
-    public function orderIndex(): Response
+    public function orderIndex(Request $request): Response
     {
+        $locale = $request->getLocale();
+        if (!RouteName::checkAuthorizedLocales($this->localeRepository->findAll(), $locale)) {
+            throw new NotFoundHttpException();
+        }
         return $this->render('user/order/index.html.twig', [
             'orderState' => Order::STATE,
         ]);
     }
 
     #[Route('/order-{id}-{number}', name: RouteName::USER_ORDER)]
-    public function order(Order $order, $number): RedirectResponse|Response
+    public function order(Order $order, $number, Request $request): RedirectResponse|Response
     {
+        if ($order->getUser() !== $this->getUser()) {
+            throw new NotFoundHttpException();
+        }
+        $locale = $request->getLocale();
+        if (!RouteName::checkAuthorizedLocales($this->localeRepository->findAll(), $locale)) {
+            throw new NotFoundHttpException();
+        }
         if ($order->getUser() !== $this->getUser()) {
             throw new NotFoundHttpException();
         }

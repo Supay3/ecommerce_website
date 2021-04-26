@@ -25,6 +25,7 @@ class RouteName
     public const SHOP_SHOW = 'shop_show';
 
     // Routes for the checkout
+    public const CHECKOUT_CHOOSE_ACCOUNT = 'checkout_choose_account';
     public const CHECKOUT_ADDRESS = 'checkout_address';
     public const CHECKOUT_SHIPMENT = 'checkout_shipment';
     public const CHECKOUT_SUMMARY = 'checkout_summary';

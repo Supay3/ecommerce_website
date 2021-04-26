@@ -12,7 +12,7 @@ use App\Entity\Shop\Product\ProductBrand;
 use App\Entity\Shop\Product\ProductCategory;
 use App\Entity\Shop\Product\ProductType;
 use App\Entity\Shop\Shipment\Shipment;
-use App\Entity\User;
+use App\Entity\User\User;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Dashboard;
 use EasyCorp\Bundle\EasyAdminBundle\Config\MenuItem;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractDashboardController;

@@ -19,7 +19,6 @@ use App\Repository\Shop\LocaleRepository;
 use App\Repository\Shop\Order\AddressRepository;
 use App\Repository\Shop\Product\ProductRepository;
 use App\Repository\Shop\Shipment\ShipmentRepository;
-use App\Repository\User\UserRepository;
 use App\Services\Shop\Order\CartService;
 use App\Services\Shop\Order\OrderService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -29,6 +28,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 
 // TODO : l'adresse de facturation doit être la même que l'adresse de livraison dans une commande si pas de choix d'adresse de facturation
 // TODO : refactor absolument, pour le addressWithAccount qui dispose d'une logique quasi-similaire à address
@@ -51,6 +51,29 @@ class CheckoutController extends AbstractController
         $this->cartService = $cartService;
         $this->orderService = $orderService;
         $this->localeRepository = $localeRepository;
+    }
+
+    #[Route('/choose-account', name: RouteName::CHECKOUT_CHOOSE_ACCOUNT)]
+public function chooseAccount(Request $request, AuthenticationUtils $authenticationUtils): RedirectResponse|Response
+    {
+        if ($this->isGranted('ROLE_USER')) {
+            return $this->redirectToRoute(RouteName::ADDRESS_WITH_ACCOUNT);
+        }
+        if (!RouteName::checkAuthorizedLocales($this->localeRepository->findAll(), $request->getLocale())) {
+            throw new NotFoundHttpException();
+        }
+        try {
+            $this->cartService->checkCart();
+            $error = $authenticationUtils->getLastAuthenticationError();
+            $lastUsername = $authenticationUtils->getLastUsername();
+        } catch (CartEmptyException $e) {
+            $this->addFlash($e::ERROR_NAME, $e->errorMessage());
+            return $this->redirectToRoute(RouteName::CART_INDEX);
+        }
+        return $this->render('shop/checkout/choose_account.html.twig', [
+            'last_username' => $lastUsername,
+            'error' => $error,
+        ]);
     }
 
     #[Route('/address-account', name: RouteName::ADDRESS_WITH_ACCOUNT)]
@@ -145,7 +168,6 @@ class CheckoutController extends AbstractController
         ProductRepository $productRepository,
         ShipmentRepository $shipmentRepository,
         AddressRepository $addressRepository,
-        UserRepository $userRepository,
     ): Response
     {
         try {
