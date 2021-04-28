@@ -32,7 +32,6 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 
 // TODO : l'adresse de facturation doit être la même que l'adresse de livraison dans une commande si pas de choix d'adresse de facturation
-// TODO : refactor absolument, pour le addressWithAccount qui dispose d'une logique quasi-similaire à address
 #[Route('/{_locale}/shop/checkout')]
 class CheckoutController extends AbstractController
 {

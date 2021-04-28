@@ -58,7 +58,7 @@ class ProductCrudController extends AbstractCrudController
                 ->setEntryType(ProductTranslationType::class),
             CollectionField::new('productTranslations', 'Traductions')
                 ->onlyOnDetail()
-                ->setTemplatePath('admin/shop/_translation.html.twig'),
+                ->setTemplatePath('admin/shop/product/_translation.html.twig'),
             CollectionField::new('images')
                 ->onlyOnForms()
                 ->setEntryType(ProductImageType::class),

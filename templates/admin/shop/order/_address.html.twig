@@ -1,0 +1,13 @@
+<div class="form-widget">
+    {% if field.value is not empty %}
+        <p>
+            {{ field.value.firstname }} {{ field.value.lastname }}<br>
+            {{ field.value.street }}<br>
+            {% if field.value.company %}
+                {{ field.value.company }}
+            {% endif %}
+            {{ field.value.postcode|number_format(0, '', ' ') }}, {{ field.value.city }}<br>
+            {{ field.value.countryCode }}
+        </p>
+    {% endif %}
+</div>

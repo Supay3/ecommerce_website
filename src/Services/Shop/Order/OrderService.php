@@ -5,6 +5,7 @@ namespace App\Services\Shop\Order;
 
 
 use App\Controller\RouteName;
+use App\Entity\Shop\Order\Address;
 use App\Entity\Shop\Order\Order;
 use App\Entity\Shop\Order\OrderNumber;
 use App\Entity\Shop\Order\ProductSold;
@@ -127,6 +128,19 @@ class OrderService
                     $this->shipmentRepository->find($this->requestStack->getCurrentRequest()->getSession()->get('shipment')) :
                     throw new NoShipmentException()
             ;
+            if (!$order->getBillingAddress()) {
+                $billingAddress = new Address();
+                $billingAddress
+                    ->setPhoneNumber($order->getShippingAddress()->getPhoneNumber())
+                    ->setFirstname($order->getShippingAddress()->getFirstname())
+                    ->setLastname($order->getShippingAddress()->getLastname())
+                    ->setCity($order->getShippingAddress()->getCity())
+                    ->setCountryCode($order->getShippingAddress()->getCountryCode())
+                    ->setPostcode($order->getShippingAddress()->getPostcode())
+                    ->setStreet($order->getShippingAddress()->getStreet())
+                    ->setCompany($order->getShippingAddress()->getCompany())
+                ;
+            }
             $order
                 ->setToken($this->generateOrderToken())
                 ->setState(0)

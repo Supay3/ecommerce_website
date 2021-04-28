@@ -1,0 +1,5 @@
+<div class="form-widget">
+   {% for item in field.value %}
+       x{{ item.quantity }} : {{ item.product.code }}<br>
+   {% endfor %}
+</div>

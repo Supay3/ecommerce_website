@@ -1,0 +1,13 @@
+<div class="form-widget">
+    {% if field.value is not empty %}
+        <p>
+            {{ field.value.firstname }} {{ field.value.lastname }}<br>
+            {{ field.value.email }}<br>
+            {{ field.value.formattedPhoneNumber }}
+        </p>
+    {% else %}
+        <p class="badge badge-secondary">
+            Pas d'utilisateur
+        </p>
+    {% endif %}
+</div>

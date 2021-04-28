@@ -264,6 +264,11 @@ class User implements UserInterface
         return $this;
     }
 
+    public function getFormattedPhoneNumber(): string
+    {
+        return chunk_split($this->phoneNumber, 2, '.');
+    }
+
     public function getFirstname(): ?string
     {
         return $this->firstname;
