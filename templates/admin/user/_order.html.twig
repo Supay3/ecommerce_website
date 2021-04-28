@@ -1,0 +1,15 @@
+<div class="form-widget">
+    <p>
+        {% for item in field.value %}
+            <a href="
+                {{ ea_url()
+                .setController('App\\Controller\\Admin\\Shop\\Order\\OrderCrudController')
+                .setAction('detail')
+                .setEntityId(item.id)
+                .generateUrl()
+            }}">
+                    {{ item.number }}
+            </a> <span class="badge badge-info">{{ item.total|number_format(2) }} €</span><span class="badge badge-secondary">{{ constant('App\\Entity\\Shop\\Order\\Order::STATE')[item.state] }}</span><br>
+        {% endfor %}
+    </p>
+</div>

@@ -44,6 +44,11 @@
                             </div>
                         </li>
                     {% endif %}
+                    {% if is_granted('ROLE_ADMIN') %}
+                        <li class="nav-item">
+                            <a href="{{ path(constant('App\\Controller\\RouteName::ADMIN_INDEX')) }}" class="nav-link text-light">Administration</a>
+                        </li>
+                    {% endif %}
                     {% if is_granted('IS_ANONYMOUS') %}
                         <li class="nav-item">
                             <a href="{{ path(constant('App\\Controller\\RouteName::APP_LOGIN')) }}" class="nav-link">Se connecter</a>

@@ -79,17 +79,17 @@ class OrderCrudController extends AbstractCrudController
                 ->setTemplatePath('admin/shop/order/_products_sold.html.twig')
                 ->onlyOnDetail(),
             DateField::new('created_at', 'Commandée le')
-                ->setFormat('d/MM/Y à H:m:s')
+                ->setFormat('d/MM/Y à HH:mm:ss')
                 ->hideOnForm(),
-            AssociationField::new('user')
+            AssociationField::new('user', 'Utilisateur')
                 ->setTemplatePath('admin/shop/order/_user.html.twig')
                 ->onlyOnDetail(),
-            AssociationField::new('user')
+            AssociationField::new('user', 'Utilisateur')
                 ->onlyOnIndex(),
-            AssociationField::new('shippingAddress')
+            AssociationField::new('shippingAddress', 'Adresse de livraison')
                 ->onlyOnDetail()
                 ->setTemplatePath('admin/shop/order/_address.html.twig'),
-            AssociationField::new('billingAddress')
+            AssociationField::new('billingAddress', 'Adresse de facturation')
                 ->onlyOnDetail()
                 ->setTemplatePath('admin/shop/order/_address.html.twig'),
         ];

@@ -1,0 +1,13 @@
+<div class="form-widget">
+    {% for item in field.value %}
+        <p>
+            {{ item.firstname }} {{ item.lastname }}<br>
+            {{ item.street }}<br>
+            {% if item.company %}
+                {{ item.company }}
+            {% endif %}
+            {{ item.postcode|number_format(0, '', ' ') }}, {{ item.city }}<br>
+            {{ item.countryCode }}
+        </p>
+    {% endfor %}
+</div>

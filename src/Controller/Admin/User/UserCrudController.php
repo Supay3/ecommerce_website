@@ -21,8 +21,12 @@ class UserCrudController extends AbstractCrudController
     {
         return [
             EmailField::new('email'),
-            CollectionField::new('addresses'),
-            CollectionField::new('orders'),
+            CollectionField::new('addresses', 'Adresse(s)')
+                ->setTemplatePath('admin/user/_address.html.twig')
+                ->onlyOnDetail(),
+            CollectionField::new('orders', 'Commande(s)')
+                ->setTemplatePath('admin/user/_order.html.twig')
+                ->onlyOnDetail(),
         ];
     }
 
